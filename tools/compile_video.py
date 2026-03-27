@@ -7,6 +7,11 @@ PURPOSE:
     Reads the latest audio path from logs/pipeline.json, sorts scene PNGs
     from assets/images/ in scene order (S01, S02A, S02B...), and produces
     a 1080x1920 vertical TikTok MP4 with Ken Burns zoom on each image.
+    
+    Features:
+    - Variable clip timing: fast cuts (hook), medium (build), slow (climax)
+    - [TEXT: "..."] overlay system: burns text onto video frames (2.5s each)
+    - [SILENCE: X.0] injection: pauses in audio are baked into pacing
 
 USAGE:
     python tools/compile_video.py --story 001_witch_of_endor
@@ -14,10 +19,11 @@ USAGE:
     python tools/compile_video.py --story 001_witch_of_endor --dry-run
 
 PIPELINE POSITION:
-    generate_audio.py -> generate_images.py -> [compile_video.py]
+    add_sfx.py -> generate_images.py -> [compile_video.py]
 
 REQUIREMENTS:
     ffmpeg must be on PATH (Windows: winget install ffmpeg or via gyan.dev)
+    script_tiktok.md should contain [TEXT: "..."] and [SILENCE: X.0] markers
 """
 
 import argparse
@@ -77,19 +83,84 @@ def append_pipeline_log(entry: dict):
 
 def get_latest_audio(story_id: str) -> tuple[Path, float] | tuple[None, None]:
     """
-    Finds the most recent successful generate_audio entry for this story.
+    Prefers the most recent successful add_sfx (mixed) output for this story.
+    Falls back to the most recent successful generate_audio (raw Kokoro) output.
     Returns (audio_path, duration_sec) or (None, None).
     """
     log = read_log()
-    for entry in reversed(log):
-        if (entry.get("step") == "generate_audio"
-                and entry.get("story_id") == story_id
-                and entry.get("status") == "success"
-                and entry.get("output_file")):
-            p = Path(entry["output_file"])
-            if p.exists():
-                return p, float(entry.get("duration_sec", 0))
+    for step_name in ("add_sfx", "generate_audio"):
+        for entry in reversed(log):
+            if (entry.get("step") == step_name
+                    and entry.get("story_id") == story_id
+                    and entry.get("status") == "success"
+                    and entry.get("output_file")):
+                p = Path(entry["output_file"])
+                if p.exists():
+                    return p, float(entry.get("duration_sec", 0))
     return None, None
+
+
+# ── SCRIPT PARSING HELPERS ────────────────────────────────────────────────────
+
+def parse_text_markers(script_path: Path) -> list[dict]:
+    """
+    Parse [TEXT: "..."] markers from script. Returns chronological list.
+    Each marker is {"text": "...", "index": n} (0-indexed order of appearance).
+    """
+    markers = []
+    if not script_path.exists():
+        return markers
+    
+    text = script_path.read_text(encoding="utf-8")
+    # Match [TEXT: "..."] anywhere in text
+    pattern = r'\[TEXT:\s*"([^"]+)"\]'
+    for match in re.finditer(pattern, text):
+        markers.append({
+            "text": match.group(1),
+            "index": len(markers)
+        })
+    return markers
+
+
+def parse_silence_markers(script_path: Path) -> list[dict]:
+    """
+    Parse [SILENCE: X.0] markers from script. Returns chronological list.
+    Each marker is {"duration_sec": float, "index": n} (0-indexed order).
+    Sums total silence duration.
+    """
+    markers = []
+    if not script_path.exists():
+        return markers
+    
+    text = script_path.read_text(encoding="utf-8")
+    # Match [SILENCE: X.0] where X is a number
+    pattern = r'\[SILENCE:\s*([\d.]+)\]'
+    for match in re.finditer(pattern, text):
+        markers.append({
+            "duration_sec": float(match.group(1)),
+            "index": len(markers)
+        })
+    return markers
+
+
+def get_silence_duration(script_path: Path) -> float:
+    """Returns total silence duration (sum of all [SILENCE: X.0] markers)."""
+    markers = parse_silence_markers(script_path)
+    return sum(m["duration_sec"] for m in markers)
+
+
+def get_clip_duration(scene_index: int, total_scenes: int, 
+                      total_audio_sec: float) -> float:
+    """
+    Variable timing per scene: fast cuts (hook), medium (build), slow (climax).
+    Durations are a starting point; all clips are scaled proportionally to fit audio.
+    """
+    if scene_index < 5:
+        return 2.5        # hook — fast cuts
+    elif scene_index < 20:
+        return 4.5        # build — medium
+    else:
+        return 7.0        # climax — slow, earned weight
 
 
 # ── FFMPEG HELPERS ────────────────────────────────────────────────────────────
@@ -231,6 +302,64 @@ def concat_clips(ffmpeg_path: str, clip_paths: list[Path], audio_path: Path,
     return result.returncode == 0
 
 
+def overlay_text_on_video(ffmpeg_path: str, video_path: Path, text_markers: list[dict],
+                          total_duration: float, output_path: Path) -> bool:
+    """
+    Burns text overlays onto video. Distributes text_markers evenly across timeline.
+    Each overlay displays for 2.5 seconds with specified drawtext styling.
+    """
+    if not text_markers:
+        # No text overlays — just copy video to output
+        cmd = [ffmpeg_path, "-y", "-i", str(video_path), "-c", "copy", str(output_path)]
+        result = subprocess.run(cmd, capture_output=True, text=True)
+        return result.returncode == 0
+    
+    n_text = len(text_markers)
+    gap = total_duration / n_text  # time between text starts
+    display_duration = 2.5
+    
+    # Build comma-separated drawtext filters
+    drawtext_filters = []
+    for i, marker in enumerate(text_markers):
+        start_time = i * gap
+        end_time = min(start_time + display_duration, total_duration)
+        text_escaped = marker["text"].replace("'", "\\'")
+        
+        drawtext_filter = (
+            f"drawtext="
+            f"text='{text_escaped}':"
+            f"fontsize=72:"
+            f"fontcolor=white:"
+            f"font='Arial Bold':"
+            f"shadowcolor=black:"
+            f"shadowx=3:"
+            f"shadowy=3:"
+            f"x=(w-text_w)/2:"
+            f"y=(h-text_h)/2:"
+            f"box=1:"
+            f"boxcolor=black@0.4:"
+            f"boxborderw=20:"
+            f"enable='between(t,{start_time:.1f},{end_time:.1f})'"
+        )
+        drawtext_filters.append(drawtext_filter)
+    
+    # Chain all drawtext filters
+    vf = ",".join(drawtext_filters)
+    
+    cmd = [
+        ffmpeg_path,
+        "-y",
+        "-i", str(video_path),
+        "-vf", vf,
+        "-c:a", "copy",
+        "-movflags", "+faststart",
+        str(output_path)
+    ]
+    
+    result = subprocess.run(cmd, capture_output=True, text=True)
+    return result.returncode == 0
+
+
 # ── MAIN ──────────────────────────────────────────────────────────────────────
 
 def compile_video(story_id: str, fps: int, dry_run: bool):
@@ -265,12 +394,28 @@ def compile_video(story_id: str, fps: int, dry_run: bool):
         print(f"        Run: python tools/generate_audio.py --story {story_id}")
         sys.exit(1)
 
-    # Probe exact duration (more accurate than the logged estimate)
+    # ── Probe exact duration (more accurate than the logged estimate)
     probed = probe_duration(ffmpeg_path, audio_path)
     audio_duration = probed if probed > 0 else logged_duration
 
     print(f"       Audio  : {audio_path.name}")
     print(f"       Duration: {audio_duration:.2f}s")
+
+    # ── Read script and parse markers
+    script_path = story_dir / "script_tiktok.md"
+    silence_duration = get_silence_duration(script_path)
+    text_markers = parse_text_markers(script_path)
+    
+    if silence_duration > 0:
+        print(f"       Silence: {silence_duration:.2f}s (subtracted from timing)")
+    if text_markers:
+        print(f"       Text overlays: {len(text_markers)} markers found")
+    
+    # Subtract silence from video timing duration
+    video_duration = audio_duration - silence_duration
+    if video_duration < 0:
+        print("[ERROR] Total silence duration exceeds audio duration.")
+        sys.exit(1)
 
     # ── Collect and sort scene images
     print("[3/5] Collecting scene images...")
@@ -284,18 +429,35 @@ def compile_video(story_id: str, fps: int, dry_run: bool):
         print(f"        Run: python tools/generate_images.py --story {story_id}")
         sys.exit(1)
 
-    n_images       = len(scene_files)
-    duration_each  = audio_duration / n_images
+    n_images = len(scene_files)
+    
+    # Calculate variable durations per clip
+    clip_durations = []
+    total_preset_duration = 0.0
+    for i in range(n_images):
+        dur = get_clip_duration(i, n_images, video_duration)
+        clip_durations.append(dur)
+        total_preset_duration += dur
+    
+    # Scale all durations proportionally so sum equals video_duration
+    if total_preset_duration > 0:
+        scale_factor = video_duration / total_preset_duration
+        clip_durations = [d * scale_factor for d in clip_durations]
+    else:
+        # Fallback: equal distribution
+        clip_durations = [video_duration / n_images] * n_images
 
     print(f"       Scenes  : {n_images}")
-    print(f"       Per clip: {duration_each:.2f}s\n")
+    print(f"       Video duration: {video_duration:.2f}s\n")
 
     for i, p in enumerate(scene_files, 1):
-        print(f"       {i:02d}. {p.name}")
+        print(f"       {i:02d}. {p.name} ({clip_durations[i-1]:.2f}s)")
 
     if dry_run:
         print(f"\n[DRY RUN] Would generate {n_images} clips -> concat -> {output_filename}")
-        print(f"          Total duration: ~{audio_duration:.1f}s")
+        print(f"          Total video duration: ~{video_duration:.1f}s")
+        if text_markers:
+            print(f"          + {len(text_markers)} text overlays")
         print(f"          Output: {output_path}")
         return
 
@@ -314,14 +476,15 @@ def compile_video(story_id: str, fps: int, dry_run: bool):
             zoom_dir      = pan_cycle[i % len(pan_cycle)]
             key            = scene_sort_key(img_path)
             scene_label    = f"S{key[0]:02d}{key[1]}"
+            clip_dur       = clip_durations[i]
 
-            print(f"  [{i+1:02d}/{n_images}] {scene_label} ({zoom_dir}) — {img_path.name}")
+            print(f"  [{i+1:02d}/{n_images}] {scene_label} ({zoom_dir}, {clip_dur:.2f}s) — {img_path.name}")
 
             ok = make_clip(
                 ffmpeg_path=ffmpeg_path,
                 image_path=img_path,
                 clip_path=clip_path,
-                duration=duration_each,
+                duration=clip_dur,
                 fps=fps,
                 zoom_direction=zoom_dir
             )
@@ -337,17 +500,40 @@ def compile_video(story_id: str, fps: int, dry_run: bool):
 
         # ── Concat + audio
         print(f"\n[5/5] Concatenating clips and adding audio...")
+        concat_output = output_path.parent / f"{story_id}_concat_temp.mp4"
+        
         ok = concat_clips(
             ffmpeg_path=ffmpeg_path,
             clip_paths=clip_paths,
             audio_path=audio_path,
-            output_path=output_path,
+            output_path=concat_output,
             fps=fps
         )
 
         if not ok:
             print("[ERROR] ffmpeg concat failed.")
             sys.exit(1)
+    
+    # ── Text overlay pass (if markers exist)
+    if text_markers:
+        print(f"\n[6/6] Burning {len(text_markers)} text overlays...")
+        ok = overlay_text_on_video(
+            ffmpeg_path=ffmpeg_path,
+            video_path=concat_output,
+            text_markers=text_markers,
+            total_duration=video_duration,
+            output_path=output_path
+        )
+        
+        if not ok:
+            print("[ERROR] ffmpeg text overlay pass failed.")
+            concat_output.unlink(missing_ok=True)
+            sys.exit(1)
+        
+        concat_output.unlink(missing_ok=True)
+    else:
+        # No text overlays — just rename concat output
+        concat_output.rename(output_path)
 
     # ── Done
     size_mb = output_path.stat().st_size / (1024 * 1024)
@@ -355,7 +541,7 @@ def compile_video(story_id: str, fps: int, dry_run: bool):
     print(f"  [SUCCESS] Video compiled")
     print(f"  File     : {output_filename}")
     print(f"  Size     : {size_mb:.1f} MB")
-    print(f"  Duration : ~{audio_duration:.1f}s")
+    print(f"  Duration : ~{audio_duration:.1f}s (with {silence_duration:.1f}s silence)")
     print(f"  Location : {exports_dir}")
     print(f"{'='*60}\n")
 
@@ -366,6 +552,9 @@ def compile_video(story_id: str, fps: int, dry_run: bool):
         "audio_file":    str(audio_path),
         "scene_count":   n_images,
         "duration_sec":  round(audio_duration, 1),
+        "video_duration_sec": round(video_duration, 1),
+        "silence_duration_sec": round(silence_duration, 2),
+        "text_overlay_count": len(text_markers),
         "resolution":    f"{OUTPUT_W}x{OUTPUT_H}",
         "fps":           fps,
         "output_file":   str(output_path),

@@ -67,7 +67,8 @@ def parse_tts_script(script_path: Path) -> str:
     skip_patterns = [
         r"^#",                          # markdown headers
         r"^\*\*",                       # bold labels like **RUNTIME**
-        r"^\[TEXT ON SCREEN",           # screen text markers
+        r"^\[TEXT",                      # [TEXT ON SCREEN:] and [TEXT: "..."] markers
+        r"^\[SILENCE:",                 # [SILENCE: X.0] silence injection markers
         r"^>",                          # blockquotes
         r"^---",                        # horizontal rules
         r"^```",                        # code fences (toggle)
@@ -165,7 +166,7 @@ def generate_audio(story_id: str, voice: str, speed: float, preview: bool = Fals
         sys.exit(1)
 
     word_count = len(tts_text.split())
-    est_seconds = round(word_count / (140 * speed) * 60, 1)
+    est_seconds = round(word_count / (185 * speed) * 60, 1)
     print(f"       Words: {word_count} | Est. runtime: {est_seconds}s")
 
     # ── Preview mode — just show what would be spoken

@@ -9,9 +9,10 @@ USAGE:
     python tools/run_pipeline.py --story 001_witch_of_endor --from generate_images
 
 STEPS:
-    [1/3] generate_audio.py   — Kokoro TTS -> WAV
-    [2/3] generate_images.py  — ComfyUI SDXL -> PNGs
-    [3/3] compile_video.py    — FFmpeg assembly (build that next)
+    [1/4] generate_audio.py   — Kokoro TTS -> WAV
+    [2/4] add_sfx.py          — Silence injection + music bed
+    [3/4] generate_images.py  — ComfyUI SDXL -> PNGs
+    [4/4] compile_video.py    — FFmpeg assembly
 
 Reads logs/pipeline.json to skip already-completed steps.
 Use --force to re-run all steps regardless of log state.
@@ -32,23 +33,28 @@ TOOLS_DIR    = BASE_DIR / "tools"
 
 STEPS = [
     {
-        "name":    "generate_audio",
-        "label":   "Audio (Kokoro TTS)",
-        "script":  "generate_audio.py",
-        "args":    [],
+        "name":   "generate_audio",
+        "label":  "Audio (Kokoro TTS)",
+        "script": "generate_audio.py",
+        "args":   [],
     },
     {
-        "name":    "generate_images",
-        "label":   "Images (ComfyUI SDXL)",
-        "script":  "generate_images.py",
-        "args":    [],
+        "name":   "add_sfx",
+        "label":  "SFX / Music mix",
+        "script": "add_sfx.py",
+        "args":   [],
     },
     {
-        "name":    "compile_video",
-        "label":   "Video compile (FFmpeg)",
-        "script":  "compile_video.py",
-        "args":    [],
-        "not_built": True,
+        "name":   "generate_images",
+        "label":  "Images (ComfyUI SDXL)",
+        "script": "generate_images.py",
+        "args":   [],
+    },
+    {
+        "name":   "compile_video",
+        "label":  "Video compile (FFmpeg)",
+        "script": "compile_video.py",
+        "args":   [],
     },
 ]
 
@@ -212,8 +218,9 @@ Examples:
 
 Steps:
   generate_audio    Kokoro TTS -> WAV
+  add_sfx           Silence injection + music bed
   generate_images   ComfyUI SDXL -> PNGs (requires ComfyUI running)
-  compile_video     FFmpeg assembly (not built yet)
+  compile_video     FFmpeg assembly
         """
     )
     parser.add_argument("--story",  required=True, help="Story folder name, e.g. 001_witch_of_endor")

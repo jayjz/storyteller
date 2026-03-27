@@ -1,20 +1,18 @@
 # Story 001: The Witch of Endor
-## TikTok Script — Kokoro TTS Optimized
+## TikTok Script — Kokoro TTS Optimized — 3 MIN VERSION
 ---
-**RUNTIME TARGET:** 75 seconds
-**WORD COUNT:** ~170 words at ~140 wpm
-**VOICE MODEL:** Kokoro TTS — use "af_sarah" or "am_michael" for gravitas
-**HOOK DEADLINE:** First 3 seconds stops the scroll
+**RUNTIME TARGET:** 3 minutes
+**WORD COUNT:** ~390 words at ~130 wpm
+**VOICE MODEL:** Kokoro TTS — am_michael
+**SPEED:** 0.92
 
 ---
-## KOKORO DELIVERY NOTES (read before generating)
+## KOKORO DELIVERY NOTES
 - Max 15 words per sentence
-- Periods = natural pause. Use them aggressively.
-- [pause] = hard 0.5 sec beat — use at dramatic turns
-- Phonetics written inline for biblical names
-- No semicolons, em-dashes, or parentheses — Kokoro stumbles on these
-- Ellipses (...) are fine for trailing off
-- ALL CAPS = emphasis hint for Kokoro
+- Periods = natural pause
+- [pause] = hard 0.5 sec beat
+- No semicolons, em-dashes, parentheses
+- Plain ASCII only — no accented characters
 
 ---
 ## FULL SCRIPT — TTS READY
@@ -22,38 +20,161 @@
 *[TEXT ON SCREEN: "The Bible has a seance scene."]*
 
 The Bible has a seance scene.
-And it gets weirder from there.
+Most people have never heard of it.
 [pause]
-King Saul was terrified.
-The night before his final battle...
-God had gone completely silent.
-No dreams. No prophets. Nothing.
+This is the story of a king who lost everything.
+And made one final, desperate mistake.
 [pause]
-So Saul did something desperate.
+His name was Saul.
+And he was once the greatest king Israel had ever seen.
+Tall. Commanding. Chosen by God himself.
+[pause]
+But Saul had a problem.
+He could not stop doing things his own way.
+[pause]
+God told him to destroy the Amalekites completely.
+Saul destroyed most of them.
+He kept the best livestock.
+He kept their king alive as a trophy.
+[pause]
+That was the moment everything changed.
+[pause]
+The prophet Samuel came to Saul that day.
+He looked at him and said something devastating.
+"Because you rejected the word of God...
+God has rejected you as king."
+[pause]
+And then Samuel turned and walked away.
+Saul grabbed his robe.
+It tore in his hand.
+Samuel did not look back.
+[pause]
+From that day forward, God went silent.
+No dreams. No visions. No answers.
+Just silence.
+[pause]
+Now flash forward years later.
+The Philistine army had gathered.
+Thousands of soldiers. Stretching across the valley.
+Saul stood on the hill opposite them.
+And he was terrified.
+[pause]
+He prayed. Nothing.
+He asked the priests. Nothing.
+He sent for prophets. Nothing.
+[pause]
+The silence was total.
+[pause]
+So Saul did something that should have been unthinkable.
 He disguised himself.
-He snuck through enemy lines. At night.
-To find the one woman he had ordered executed.
+Removed his royal robes.
+Put on common clothes.
+And in the middle of the night...
+he crossed behind enemy lines.
 [pause]
-A witch.
-He asked her to summon the dead prophet Samuel.
-She performed the ritual.
+He was looking for a woman.
+A medium. A necromancer.
+Someone who communicated with the dead.
 [pause]
-Then she screamed.
-Because what appeared... was nothing like what she expected.
+The irony was brutal.
+Saul himself had outlawed this practice years earlier.
+He had driven every medium and spiritist out of Israel.
+Now he needed one.
 [pause]
-The spirit looked at Saul and spoke.
+He found her in a village called En-dor.
+He knocked on her door in the dark.
+And he asked her to summon the dead.
+[pause]
+She refused at first. She was terrified.
+The king had made this a capital offense.
+But the disguised Saul swore she would not be punished.
+[pause]
+So she performed the ritual.
+[pause]
+Then she stopped.
+And screamed.
+[pause]
+Because she suddenly recognized Saul.
+And because what was appearing...
+was nothing like anything she had summoned before.
+[pause]
+She saw an old man.
+Rising from the earth.
+Wrapped in a robe.
+[pause]
+Saul asked. "What does he look like?"
+She described him.
+And Saul knew immediately.
+It was Samuel.
+[pause]
+The dead prophet looked at the king and spoke.
+His first words were not comfort.
+They were a question.
+[pause]
 "Why have you disturbed my rest?"
 [pause]
-"Tomorrow. You and your sons will be dead."
+Saul poured out everything.
+The army. The silence. The terror.
+He begged for guidance.
 [pause]
-Every word came true.
-The very next day. At the Battle of Gilboa.
+Samuel's answer was short.
+And absolutely devastating.
+[pause]
+"God has done exactly what he told you he would do.
+He has torn the kingdom from your hands.
+And given it to David."
+[pause]
+"Tomorrow..."
+[pause]
+"You and your sons will be with me."
+[pause]
+Saul collapsed face-down on the ground.
+He could not move.
+He could not speak.
+[pause]
+The woman of En-dor knelt beside him.
+This outcast. This criminal in his own law.
+She fed him. She made him eat.
+Because even she understood.
+This man was already gone.
+[pause]
+The next day, at the Battle of Gilboa...
+every word came true.
 [pause]
 This is a real story.
-First Samuel. Chapter twenty-eight.
-Go read it tonight.
+First Samuel, chapter twenty-eight.
+Read it tonight.
 
 *[TEXT ON SCREEN: "1 Samuel 28 — read it."]*
+
+---
+## DIRECTOR NOTES
+- **Hook [0:00–0:03]:** Text overlay before voice. Let it land.
+- **Pacing:** Slow and deliberate throughout. This is not a listicle.
+- **The silence motif:** Every "Nothing." lands like a door closing.
+- **Samuel's prophecy:** DEAD slow. One line. Pause. Next line.
+- **Saul's collapse:** Let the silence after "be with me" run 2 full seconds.
+- **End:** Quiet. Not triumphant. Let the weight sit.
+- **Music:** Sparse low drone throughout. Swell only at Samuel's appearance.
+- **Visuals:** Slow cuts. Each image holds 4-6 seconds minimum.
+- **Captions:** Always on. Verify: Saul, Samuel, Gilboa, En-dor, Philistine.
+
+---
+## KOKORO GENERATION SETTINGS (RTX 4060)
+```
+voice: am_michael
+speed: 0.92
+language: en-us
+output: witch_of_endor_tiktok_v2.wav
+```
+
+---
+## HASHTAG SET
+```
+#BibleStories #Christianity #History #DidYouKnow #BibleFacts
+#OldTestament #KingdomOfIsrael #Samuel #HiddenHistory
+#BiblicalHistory #FaithTok #ChristianTok
+```
 
 ---
 ## DIRECTOR NOTES
