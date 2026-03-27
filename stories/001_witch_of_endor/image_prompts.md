@@ -90,7 +90,7 @@ Three cloaked figures moving through rocky hills at night, ancient Levant landsc
 ## S07 — The Woman of Endor and the Disguised Saul
 
 ```
-Inside a low ancient stone dwelling, a weathered Israelite woman of middle age facing a cloaked disguised man across a small fire, 11th century BCE, the woman's face suspicious and frightened, firelight from below illuminating both faces with orange and gold, deep shadows behind them, simple stone walls, ritual objects barely visible on a low shelf, face-to-face confrontation across the flame, biblical epic oil painting, Rembrandt lighting, chiaroscuro, cinematic two-shot, ancient Levant interior, photorealistic painting, masterwork quality
+Inside a low ancient stone dwelling, a weathered Israelite woman of middle age, gaunt hollow cheeks, wild silver-gray hair, deep-set dark eyes, worn dark linen robes, age-lined face, strong nose, haunted expression, facing a cloaked disguised man across a small fire, 11th century BCE, the woman's face suspicious and frightened, firelight from below illuminating both faces with orange and gold, deep shadows behind them, simple stone walls, ritual objects barely visible on a low shelf, face-to-face confrontation across the flame, biblical epic oil painting, Rembrandt lighting, chiaroscuro, cinematic two-shot, ancient Levant interior, photorealistic painting, masterwork quality
 ```
 
 **Shot:** Two-shot across the fire, both faces lit from below
@@ -101,7 +101,7 @@ Inside a low ancient stone dwelling, a weathered Israelite woman of middle age f
 ## S08A — The Summoning Ritual
 
 ```
-Ancient Israelite woman performing a ritual in a low stone room, hands raised, eyes closed, face strained with concentration, small fire burning low, deep shadows, the atmosphere feels charged and heavy, 11th century BCE interior, dim warm light, ritual objects on the floor, the light is changing — a cold pale glow beginning to appear at the edge of the frame, biblical epic oil painting, Rembrandt lighting, chiaroscuro, cinematic close-up, ancient Levant, photorealistic painting, mysterious atmosphere, sacred dread, masterwork quality
+Ancient Israelite woman, gaunt hollow cheeks, wild silver-gray hair, deep-set dark eyes, worn dark linen robes, age-lined face, strong nose, haunted expression, performing a ritual in a low stone room, hands raised, eyes closed, face strained with concentration, small fire burning low, deep shadows, the atmosphere feels charged and heavy, 11th century BCE interior, dim warm light, ritual objects on the floor, the light is changing — a cold pale glow beginning to appear at the edge of the frame, biblical epic oil painting, Rembrandt lighting, chiaroscuro, cinematic close-up, ancient Levant, photorealistic painting, mysterious atmosphere, sacred dread, masterwork quality
 ```
 
 **Shot:** Close-up on the woman mid-ritual

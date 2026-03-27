@@ -15,7 +15,7 @@ USAGE:
 
 COMFYUI SETUP (if not running):
     1. cd ComfyUI && python main.py --listen 0.0.0.0 --port 8188
-    2. Ensure SDXL checkpoint is loaded (e.g. sd_xl_base_1.0.safetensors)
+    2. Ensure SDXL checkpoint is loaded (e.g. juggernautXL_ragnarokBy.safetensors)
 
 PIPELINE POSITION:
     generate_audio.py → [generate_images.py] → compile_video.py
@@ -137,7 +137,7 @@ def build_sdxl_workflow(prompt: str, negative: str, width: int, height: int,
         "1": {
             "class_type": "CheckpointLoaderSimple",
             "inputs": {
-                "ckpt_name": "sd_xl_base_1.0.safetensors"
+                "ckpt_name": "juggernautXL_ragnarokBy.safetensors"
             }
         },
         "2": {

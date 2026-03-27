@@ -27,3 +27,11 @@ Date | Story # | Category | Lesson
 
 ---
 *Update this file after every completed story*
+
+
+This is a critical lesson for every future story:
+```
+KOKORO RULE: Never use phonetic respellings (SAY-myu-el, Gil-BOH-ah).
+Kokoro reads real words better than approximations.
+ALL CAPS works for pacing hints but can sound robotic — use sparingly.
+Accented characters (é, ā) → replace with plain ASCII equivalents.

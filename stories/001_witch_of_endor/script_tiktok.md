@@ -19,12 +19,12 @@
 ---
 ## FULL SCRIPT — TTS READY
 
-*[TEXT ON SCREEN: "The Bible has a séance scene."]*
+*[TEXT ON SCREEN: "The Bible has a seance scene."]*
 
-The Bible has a séance scene.
+The Bible has a seance scene.
 And it gets weirder from there.
 [pause]
-King SAUL was terrified.
+King Saul was terrified.
 The night before his final battle...
 God had gone completely silent.
 No dreams. No prophets. Nothing.
@@ -35,10 +35,10 @@ He snuck through enemy lines. At night.
 To find the one woman he had ordered executed.
 [pause]
 A witch.
-He asked her to summon the dead prophet SAY-myu-el.
+He asked her to summon the dead prophet Samuel.
 She performed the ritual.
 [pause]
-Then she SCREAMED.
+Then she screamed.
 Because what appeared... was nothing like what she expected.
 [pause]
 The spirit looked at Saul and spoke.
@@ -47,10 +47,10 @@ The spirit looked at Saul and spoke.
 "Tomorrow. You and your sons will be dead."
 [pause]
 Every word came true.
-The very next day. At the Battle of Gil-BOH-ah.
+The very next day. At the Battle of Gilboa.
 [pause]
 This is a real story.
-First SAM-yoo-el. Chapter twenty-eight.
+First Samuel. Chapter twenty-eight.
 Go read it tonight.
 
 *[TEXT ON SCREEN: "1 Samuel 28 — read it."]*
