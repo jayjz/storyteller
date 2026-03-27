@@ -1,0 +1,114 @@
+# ============================================================
+# .gitignore — Biblical Storytelling Pipeline
+# Track: code, scripts, markdown content, templates
+# Ignore: binaries, models, generated media, secrets
+# ============================================================
+
+# ── PYTHON ENVIRONMENT ──────────────────────────────────────
+venv/
+.venv/
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.egg-info/
+dist/
+build/
+.eggs/
+*.egg
+
+# ── GENERATED MEDIA (too large for git) ─────────────────────
+# These get generated locally — never commit them
+stories/*/assets/images/
+stories/*/assets/audio/
+stories/*/assets/exports/
+
+# ── AI MODEL WEIGHTS & CACHE ────────────────────────────────
+.cache/
+*.pth
+*.pt
+*.onnx
+*.safetensors
+*.bin
+voices/
+models/
+
+# ── AUDIO FILES ─────────────────────────────────────────────
+*.wav
+*.mp3
+*.flac
+*.aac
+*.ogg
+
+# ── VIDEO FILES ─────────────────────────────────────────────
+*.mp4
+*.mov
+*.avi
+*.mkv
+*.webm
+
+# ── IMAGE FILES ─────────────────────────────────────────────
+*.png
+*.jpg
+*.jpeg
+*.webp
+*.gif
+*.bmp
+*.tiff
+*.psd
+
+# ── LOGS (regenerated each session) ─────────────────────────
+logs/
+*.log
+
+# ── COMFYUI ─────────────────────────────────────────────────
+ComfyUI/
+comfyui_output/
+output/
+
+# ── SECRETS — NEVER COMMIT ──────────────────────────────────
+.env
+.env.*
+.env.local
+secrets.json
+api_keys.txt
+*.key
+*.pem
+
+# ── OS NOISE ────────────────────────────────────────────────
+.DS_Store
+.DS_Store?
+._*
+Thumbs.db
+desktop.ini
+ehthumbs.db
+
+# ── EDITOR FILES ────────────────────────────────────────────
+.vscode/
+.idea/
+*.swp
+*.swo
+*.suo
+*.user
+*.workspace
+*.sublime-project
+*.sublime-workspace
+
+# ── WINDOWS ─────────────────────────────────────────────────
+$RECYCLE.BIN/
+*.lnk
+
+# ── WHAT IS TRACKED (explicitly noted for clarity) ──────────
+# tools/*.py                    pipeline scripts
+# stories/*/script_*.md         all story scripts
+# stories/*/scene_breakdown.json scene data
+# stories/*/image_prompts.md    ComfyUI prompts
+# stories/*/voiceover_notes.md  ElevenLabs/Kokoro cues
+# templates/                    reusable templates
+# styles/                       visual style guide
+# music/music_sources.md        royalty-free music refs
+# CLAUDE.md                     Claude Code instructions
+# memories.md                   project memory log
+# lessons.md                    lessons learned
+# README.md                     pipeline SOP
+# requirements.txt              python dependencies

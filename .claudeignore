@@ -1,0 +1,48 @@
+# --- Version Control ---
+.git/
+.gitignore
+
+# --- Environment & Secrets (CRITICAL) ---
+.env
+*.pem
+*.key
+certs/
+secrets.json
+
+# --- Python & AI Dependencies ---
+__pycache__/
+*.py[cod]
+*$py.class
+venv/
+.venv/
+env/
+# Ignore massive model weights or ComfyUI outputs
+models/
+output/
+input/
+
+# --- Node/Web Development ---
+node_modules/
+dist/
+build/
+.next/
+.svelte-kit/
+out/
+package-lock.json
+pnpm-lock.yaml
+
+# --- System & IDE Noise ---
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+*.swp
+*.log
+
+# --- Large Assets & Documentation ---
+*.mp4
+*.wav
+*.pdf
+*.zip
+*.tar.gz
+site-packages/

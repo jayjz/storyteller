@@ -1,0 +1,9 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(source venv/Scripts/activate)",
+      "Bash(python tools/generate_audio.py --story 001_witch_of_endor --preview)",
+      "Bash(python tools/generate_audio.py --story 001_witch_of_endor)"
+    ]
+  }
+}
