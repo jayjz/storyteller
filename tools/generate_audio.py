@@ -4,9 +4,9 @@ generate_audio.py
 Step 1 of the Autonomous Biblical Storytelling Pipeline
 
 PURPOSE:
-    Reads a Kokoro-optimized TikTok script, strips all non-TTS content,
-    generates a WAV file via Kokoro TTS, and saves it to the correct
-    story's assets/audio/ folder.
+    Reads a TikTok script, strips all non-TTS content,
+    generates a WAV file via Supertonic TTS (upgraded from Kokoro),
+    and saves it to the correct story's assets/audio/ folder.
 
 USAGE:
     python tools/generate_audio.py --story 001_witch_of_endor
@@ -17,7 +17,7 @@ PIPELINE POSITION:
     [generate_audio.py] → generate_images.py → compile_video.py → publish.py
 
 REQUIREMENTS:
-    pip install kokoro soundfile numpy
+    pip install supertonic soundfile numpy
 """
 
 import argparse
@@ -39,23 +39,32 @@ PIPELINE_LOG = LOGS_DIR / "pipeline.json"
 
 DEFAULT_VOICE = "am_michael"       # deep, authoritative narrator
 DEFAULT_SPEED = 0.92               # slightly slower for drama
-SAMPLE_RATE   = 24000              # Kokoro native sample rate
+SAMPLE_RATE   = 44100              # Supertonic native sample rate (upgraded from 24000)
+
+# Voice mapping: Kokoro → Supertonic
+# Supertonic voices: M1-M5 (male), F1-F5 (female)
+VOICE_MAP = {
+    "am_michael": "M1",    # Deep male — authoritative narrator
+    "af_sarah":   "F1",    # Female — eerie, haunting
+    "am_adam":    "M2",    # Male — warm, conversational
+    "af_bella":   "F2",    # Female — warm, clear
+}
 
 AVAILABLE_VOICES = {
-    "am_michael": "Deep male — authoritative narrator (recommended for biblical)",
-    "af_sarah":   "Female — eerie, haunting (good for supernatural stories)",
-    "am_adam":    "Male — warm, conversational",
-    "af_bella":   "Female — warm, clear",
+    "am_michael": "Deep male — authoritative narrator (recommended for biblical) [Supertonic M1]",
+    "af_sarah":   "Female — eerie, haunting (good for supernatural stories) [Supertonic F1]",
+    "am_adam":    "Male — warm, conversational [Supertonic M2]",
+    "af_bella":   "Female — warm, clear [Supertonic F2]",
 }
 
 # ── SCRIPT PARSER ─────────────────────────────────────────────────────────────
 
 def parse_tts_script(script_path: Path) -> str:
     """
-    Extracts only speakable lines from a Kokoro-optimized TikTok script.
+    Extracts only speakable lines from a TikTok script.
     Strips: markdown headers, director notes, hashtags, code blocks,
             text-on-screen markers, and blank lines.
-    Converts: [pause] markers into actual silence tokens Kokoro respects (...)
+    Converts: [pause] markers into actual silence tokens Supertonic respects (...)
     """
     raw = script_path.read_text(encoding="utf-8")
     lines = raw.splitlines()
@@ -178,40 +187,58 @@ def generate_audio(story_id: str, voice: str, speed: float, preview: bool = Fals
         print("[PREVIEW] No audio generated. Remove --preview to generate.")
         return
 
-    # ── Load Kokoro
-    print("[2/4] Loading Kokoro TTS (RTX 4060 GPU acceleration)...")
+    # ── Load Supertonic TTS
+    print("[2/4] Loading Supertonic TTS (ONNX Runtime acceleration)...")
     try:
-        from kokoro import KPipeline
+        from supertonic import TTS
         import soundfile as sf
         import numpy as np
     except ImportError as e:
         print(f"[ERROR] Missing dependency: {e}")
-        print(f"        Run: pip install kokoro soundfile numpy")
+        print(f"        Run: pip install supertonic soundfile numpy")
         sys.exit(1)
 
     try:
-        pipe = KPipeline(lang_code="a")  # 'a' = American English
+        # Initialize Supertonic - first run downloads model (~400MB)
+        tts = TTS(auto_download=True)
+        # Map Kokoro voice to Supertonic voice
+        supertonic_voice = VOICE_MAP.get(voice, "M1")
+        voice_style = tts.get_voice_style(voice_name=supertonic_voice)
+        print(f"       Engine: Supertonic (44.1kHz, ONNX)")
+        print(f"       Voice mapped: {voice} → {supertonic_voice}")
     except Exception as e:
-        print(f"[ERROR] Failed to load Kokoro pipeline: {e}")
+        print(f"[ERROR] Failed to load Supertonic: {e}")
         sys.exit(1)
 
     # ── Generate audio
-    print("[3/4] Generating audio...")
+    print("[3/4] Generating audio with Supertonic...")
     try:
-        # Kokoro generator yields (graphemes, phonemes, audio) tuples
-        audio_chunks = []
-        for gs, ps, audio_chunk in pipe(tts_text, voice=voice, speed=speed):
-            if audio_chunk is not None:
-                audio_chunks.append(audio_chunk)
+        # Supertonic synthesis - much faster than Kokoro
+        # Convert speed: Kokoro 1.0 = normal, Supertonic 1.05 = normal
+        # Scale to maintain compatibility: 0.92 → ~0.97
+        supertonic_speed = speed * 1.05
+        
+        wav, duration_arr = tts.synthesize(
+            text=tts_text,
+            voice_style=voice_style,
+            lang="en",
+            speed=supertonic_speed,
+            total_steps=8,  # Quality: 5-12, default 8 (medium-high)
+            verbose=False
+        )
+        
+        # Supertonic returns shape (1, num_samples), squeeze to 1D
+        audio = wav.squeeze() if wav.ndim > 1 else wav
+        duration = float(duration_arr[0]) if hasattr(duration_arr, '__len__') else float(duration_arr)
 
-        if not audio_chunks:
-            print("[ERROR] Kokoro returned no audio. Check voice name and input text.")
+        if audio is None or len(audio) == 0:
+            print("[ERROR] Supertonic returned no audio. Check voice name and input text.")
             sys.exit(1)
-
-        audio = np.concatenate(audio_chunks)
 
     except Exception as e:
         print(f"[ERROR] Audio generation failed: {e}")
+        import traceback
+        traceback.print_exc()
         sys.exit(1)
 
     # ── Save WAV
@@ -223,7 +250,7 @@ def generate_audio(story_id: str, voice: str, speed: float, preview: bool = Fals
         print(f"[ERROR] Failed to save WAV: {e}")
         sys.exit(1)
 
-    duration = len(audio) / SAMPLE_RATE
+    # Duration already calculated by Supertonic
     size_kb = output_path.stat().st_size // 1024
 
     print(f"\n{'='*60}")
@@ -274,7 +301,7 @@ def append_pipeline_log(entry: dict):
 
 def main():
     parser = argparse.ArgumentParser(
-        description="Generate Kokoro TTS audio for a biblical storytelling TikTok.",
+        description="Generate Supertonic TTS audio for a biblical storytelling TikTok.",
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog="""
 Examples:
@@ -283,13 +310,19 @@ Examples:
   python tools/generate_audio.py --story 001_witch_of_endor --preview
 
 Available voices:
-  am_michael  Deep male narrator      (default — best for biblical)
-  af_sarah    Female, eerie           (good for supernatural stories)
-  am_adam     Male, warm
-  af_bella    Female, warm and clear
+  am_michael  Deep male narrator      (default — best for biblical) [M1]
+  af_sarah    Female, eerie           (good for supernatural stories) [F1]
+  am_adam     Male, warm [M2]
+  af_bella    Female, warm and clear [F2]
 
 Pipeline:
   generate_audio.py → generate_images.py → compile_video.py → publish.py
+        
+Engine: Supertonic (upgraded from Kokoro)
+  - 44.1kHz studio-quality audio (vs 24kHz)
+  - 10x faster inference
+  - Better text normalization
+  - ONNX Runtime acceleration
         """
     )
 
@@ -300,7 +333,7 @@ Pipeline:
     parser.add_argument(
         "--voice", default=DEFAULT_VOICE,
         choices=list(AVAILABLE_VOICES.keys()),
-        help=f"Kokoro voice model (default: {DEFAULT_VOICE})"
+        help=f"Voice model (default: {DEFAULT_VOICE})"
     )
     parser.add_argument(
         "--speed", type=float, default=DEFAULT_SPEED,
@@ -318,10 +351,13 @@ Pipeline:
     args = parser.parse_args()
 
     if args.list_voices:
-        print("\nAvailable Kokoro voices:\n")
+        print("\nAvailable voices (Kokoro → Supertonic mapping):\n")
         for k, v in AVAILABLE_VOICES.items():
             marker = " ← default" if k == DEFAULT_VOICE else ""
             print(f"  {k:<15} {v}{marker}")
+        print()
+        print("Engine: Supertonic 3 (44.1kHz, ONNX Runtime)")
+        print("Upgrade: Faster inference, better quality than Kokoro")
         print()
         sys.exit(0)
 
